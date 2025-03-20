@@ -2,6 +2,7 @@
 \usepackage[table]{xcolor}
 \usepackage{array}
 \usepackage{changepage}
+\usepackage{graphicx}
 \usepackage{lmodern} % for bold teletype
 \usepackage{float}
 \usepackage[T1]{fontenc}
@@ -10,6 +11,7 @@
 \usepackage{titling}
 
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\graphicspath{ {./images/} }
 
 % titling
 \title{System Design}
@@ -124,8 +126,19 @@ Write down something that the system must do, convert that into a function, and 
 
 \textit{Non-functional requirements} specify system qualities (e.g. fast, fault-tolerant, secure). \\
 
-Possible non-functional requirements include: scalability, availability, consistency, performance, durability, maintainability, inexpensive. For example, a system might have the following requirements:
+Possible non-functional requirements include:
+\begin{itemize}
+  \item Scalability (ease of increasing capacity to handle load)
+  \item Availability (percentage of time that system can be used for production)
+  \item Consistency (all nodes have the same view of the data at all times, necessary for correctness)
+  \item Performance (requests are serviced quickly)
+  \item Durability (data remains persistent, despite catastrophic events)
+  \item Reliability (system continues to work, even if parts of it fail)
+  \item Maintainability (ease of fixing or upgrading system)
+  \item Cost (upfront and over time; hardware, software, and manpower)
+\end{itemize}
 
+For example, a video view counting system might have the following requirements:
 \begin{itemize}
   \item Scalable: Tens of thousands of video views per second
   \item Performant: A few tens of milliseconds to return total view count for a video
@@ -168,11 +181,14 @@ You could also choose both options. For example, store individual events for sev
 
 \subsubsection{Where to Store}
 
-Decide between SQL or NoSQL.
+Decide between SQL or NoSQL. \\
+
+Design a distributed system to support your database choice. For SQL, things like partitioning (sharding), replication, proxies (cluster and shard), service registry (Zookeeper).
 
 \subsubsection{How to Store}
 
-Blah blah
+If SQL, design database schema. \\
+If NoSQL, structure data as it will be queried.
 
 \subsubsection{Processing and Querying Details}
 
@@ -949,9 +965,62 @@ Consistency patterns:
 \appendix
 \newpage
 
+\section{Database Markup Language (DBML)}
+
+This is a domain-specific language (DSL) for defining database schemas.
+
+\begin{verbatim}
+Table users {
+    id integer
+    username varchar
+    role varchar
+    created_at timestamp
+}
+
+Table posts {
+    id integer [pk]
+    title varchar
+    body text [note: 'Content of the post']
+    user_id integer [ref: > users.id] // foreign key
+    created_at timestamp
+}
+\end{verbatim}
+
+A \textit{primary key} is an attribute (column) that uniquely specifies a tuple (row) in a relation (table). It can also be a \textit{minimal superkey} (\textit{candidate key}), a minimal set of attributes that together uniquely specify a tuple. \\
+
+A \textit{foreign key} is an attribute or set of attributes that references the primary key of another table. The foreign key should be equal to the primary key in some row of the primary table (\textit{referential integrity constraint}). \\
+
+There are four types of relationships:
+\begin{itemize}
+  \item One-to-one: \texttt{users.id - user\_infos.user\_id}
+  \item One-to-many: \texttt{users.id < posts.user\_id}
+  \item Many-to-one: \texttt{posts.user\_id > users.id}
+  \item Many-to-many: \texttt{authors.id <> books.id}
+\end{itemize}
+
 \section{Glossary}
 
 \textit{hypertext}: electronic text with references (hyperlinks) to other electronic text that the reader can immediately access. It is "hyper" in the sense that it goes "beyond" the linear constraint of written text.
+
+\newpage
+\section{Quicksheet}
+
+Load Balancer \\
+Reverse Proxy \\
+API Gateway \\
+
+\newpage
+\pagenumbering{gobble} % turn off page numbering
+
+\includegraphics[scale=0.35, angle=90]{processing-service}
+\newpage
+\includegraphics[scale=0.35, angle=90]{data-ingestion}
+\newpage
+\includegraphics[scale=0.35, angle=90]{data-ingestion-details}
+\newpage
+\includegraphics[scale=0.35, angle=90]{data-retrieval}
+\newpage
+\includegraphics[scale=0.35, angle=90]{data-flow}
 
 \end{document}
 
